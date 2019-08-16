@@ -1,0 +1,262 @@
+import java.io.FileInputStream;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.Scanner;
+
+public class DomingoAssignment2 {
+
+    static Connection conn = null;
+
+    public static void main(String[] args) throws Exception {
+        // Get connection properties
+        String paramsFile = "ConnectionParameters.txt";
+        if (args.length >= 1) {
+            paramsFile = args[0];
+        }
+        Properties connectprops = new Properties();
+        connectprops.load(new FileInputStream(paramsFile));
+        try {
+            // Get connection
+            Class.forName("com.mysql.jdbc.Driver");
+            String dburl = connectprops.getProperty("dburl");
+            String username = connectprops.getProperty("user");
+            conn = DriverManager.getConnection(dburl, connectprops);
+            System.out.printf("Database connection %s %s established.%n", dburl, username);
+
+            //holds all data from query
+            ArrayList<DomingoAssignment2Helper> adjData;
+            Scanner in = new Scanner(System.in);
+
+            while (true) {
+                System.out.print("Enter ticker symbol with optional date range (YYYY.MM.DD YYYY.MM.DD): ");
+                String[] input = in.nextLine().trim().split("\\s+");
+                if (input[0].equals("")) {
+                    break;
+                }
+                ResultSet data = getCompanyInfo(input);
+                if (data != null) {
+                    adjData = findSplits(data);
+                    investStrat(adjData);
+                }
+                else {
+                    System.out.println(input[0] +" not found in database");
+                }
+            }
+            System.out.println("Database connection closed");
+            conn.close();
+            in.close();
+        } catch (SQLException ex) {
+            System.out.printf("SQLException: %s%nSQLState: %s%nVendorError: %s%n",
+                    ex.getMessage(), ex.getSQLState(), ex.getErrorCode());
+        }
+    }
+
+    /*
+        pre-con: accepts just ticker symbol or ticker symbol with dates
+        post-con: returns ResultSet or null if no data found
+    */
+    public static ResultSet getCompanyInfo(String...values) throws SQLException {
+        //finds company if it exists
+        PreparedStatement pstmt = conn.prepareStatement("select Ticker, Name from company " +
+                                                            "where exists (select Ticker from company where Ticker = ?) and Ticker = ?");
+
+        pstmt.setString(1, values[0]);
+        pstmt.setString(2, values[0]);
+        ResultSet results = pstmt.executeQuery();
+
+        //check if query resulted in null (ticker doesnt exist)
+        if (results.next()) {
+            //print company name to console
+            System.out.println(results.getString(2));
+
+            //if no date range provided return all data
+            if (values.length < 2) {
+                //get all data
+                pstmt = conn.prepareStatement("select * from pricevolume " +
+                                                  "where Ticker = ? order by TransDate desc");
+
+                pstmt.setString(1,values[0]);
+                results = pstmt.executeQuery();
+                return results;
+            }
+            //get data in range
+            //dates assumed to be in chron. order left to right ascending for query
+            else {
+                pstmt = conn.prepareStatement("select * from pricevolume " +
+                                                  "where TransDate between ? and ? and Ticker = ? " +
+                                                  "order by TransDate desc");
+
+                pstmt.setString(1, values[1]);
+                pstmt.setString(2, values[2]);
+                pstmt.setString(3, values[0]);
+
+                results = pstmt.executeQuery();
+                return results;
+            }
+        }
+        //company doesnt exist, return null
+        else {
+            return null;
+        }
+    }
+
+    /*
+        pre-con: non null ResultSet
+        post-con: displays all splits and returns deque with adjusted data to reflect splits
+     */
+    public static ArrayList findSplits(ResultSet data) throws SQLException {
+        final double[] splitRatios = {1.5, 2.0, 3.0};
+        final double[] splitTolerance = {.15, .2, .3};
+
+        ArrayList<DomingoAssignment2Helper> adjData = new ArrayList<>();
+        //divisor accumulates all split ratios in data set
+        double divisor = 1.0;
+        int splitCount = 0;
+
+        while(data.next()) {
+            DomingoAssignment2Helper prevDay = new DomingoAssignment2Helper();
+            DomingoAssignment2Helper currentDay = new DomingoAssignment2Helper();
+
+            currentDay.setDate(data.getString(2));
+            currentDay.setOpen(data.getDouble(3));
+            currentDay.setAdjOpen((data.getDouble(3)) / divisor);
+            currentDay.setClose(data.getDouble(6));
+            currentDay.setAdjClose((data.getDouble(6)) / divisor);
+
+            if (data.next()) {
+                prevDay.setDate(data.getString(2));
+                prevDay.setOpen(data.getDouble(3));
+                prevDay.setAdjOpen((data.getDouble(3)) / divisor);
+                prevDay.setClose(data.getDouble(6));
+                prevDay.setAdjClose((data.getDouble(6)) / divisor);
+
+                //comparisons for split
+                for (int j = 0; j < splitRatios.length; j++) {
+                    //found a split
+                    if ((Math.abs(prevDay.getAdjClose() / currentDay.getAdjOpen() - splitRatios[j])) < splitTolerance[j]) {
+                        //3:2 split
+                        if (j == 0) {
+                            System.out.print("3:2 split on " + prevDay.getDate() + " ");
+                            System.out.printf("%.2f", prevDay.getClose());
+                            System.out.print(" ---> ");
+                            System.out.printf("%.2f", currentDay.getOpen());
+                            System.out.println();
+
+                            //update divisor
+                            divisor *= splitRatios[j];
+                            splitCount++;
+                        }
+                        //2:1 split
+                        else if (j == 1) {
+                            System.out.print("2:1 split on " + prevDay.getDate() + " ");
+                            System.out.printf("%.2f", prevDay.getClose());
+                            System.out.print(" ---> ");
+                            System.out.printf("%.2f", currentDay.getOpen());
+                            System.out.println();
+
+                            //update divisor
+                            divisor *= splitRatios[j];
+                            splitCount++;
+                        }
+                        //3:1 split
+                        else {
+                            System.out.print("3:1 split on " + prevDay.getDate() + " ");
+                            System.out.printf("%.2f", prevDay.getClose());
+                            System.out.print(" ---> ");
+                            System.out.printf("%.2f", currentDay.getOpen());
+                            System.out.println();
+
+                            //update divisor
+                            divisor *= splitRatios[j];
+                            splitCount++;
+                        }
+                    }
+                }
+            }
+            //store currentDay, most recent day will be at head
+            adjData.add(currentDay);
+            // place pointer back one row
+            data.previous();
+       }
+       //display total splits and num trading days
+        System.out.println(splitCount + " splits in " + adjData.size() + " trading days\n");
+        return adjData;
+    }
+
+    /*
+        post-con: displays results of 50 day MA strategy from given data
+     */
+    public static void investStrat(ArrayList<DomingoAssignment2Helper> adjData) {
+        System.out.println("Executing investment strategy");
+        int windowLen = 50;
+
+        if (adjData.size() < windowLen + 1) {
+            System.out.println("Net Cash: 0");
+            return;
+        }
+        //flag to check initial purchase
+        boolean firstPurch = true;
+        double cash = 0.0;
+        int shares = 0;
+        int numTrans = 0;
+        double priceAccum = 0.0;
+        double windowAvg = 0.0;
+        double nextDayOpen = 0.0;
+
+        //get 50 data points from the tail
+        while(adjData.size() > windowLen + 1) {
+            //get size of data
+            int dataSize = adjData.size();
+
+            //get current day, next, and previous relative to data size and window
+            double prevDayClose = adjData.get(dataSize - windowLen).getAdjClose();
+
+            double currDayOpen = adjData.get(dataSize - windowLen - 1).getAdjOpen();
+            double currDayClose = adjData.get(dataSize - windowLen - 1).getAdjClose();
+
+            nextDayOpen = adjData.get(dataSize - windowLen - 2).getAdjOpen();
+
+            //get window avg
+            for(int i = dataSize - 1; i > dataSize - windowLen - 1; i--) {
+                priceAccum = priceAccum + adjData.get(i).getAdjClose();
+                //remove last day (slide window forward in time)
+                if (i == dataSize - 1) {
+                    adjData.remove(i);
+                }
+            }
+            windowAvg = priceAccum / (double)windowLen;
+            //check to buy
+            if (currDayClose < windowAvg && (currDayClose / currDayOpen < 0.97000001)){
+                shares = shares + 100;
+                //check for initial purchase
+                if (firstPurch) {
+                    firstPurch = false;
+                }
+                else {
+                    cash = cash - (100.0 * nextDayOpen);
+                }
+                numTrans++;
+            }
+            //check to sell
+            if (shares >= 100 && currDayOpen > windowAvg && (currDayOpen / prevDayClose > 1.00999999)) {
+                shares = shares - 100;
+                cash = cash + (100.0 * ((currDayOpen + currDayClose) / 2.0));
+                numTrans++;
+            }
+            //reset accumulator
+            priceAccum = 0.0;
+        }
+        //apply fees
+        cash -= ((double)numTrans * 8.0);
+
+        if (shares > 0) {
+            cash += (shares * nextDayOpen);
+        }
+        //display results
+        System.out.println("Transactions executed: " + numTrans);
+        System.out.print("Net cash: ");
+        System.out.printf("%.2f", cash);
+        System.out.println("\n");
+    }
+}
