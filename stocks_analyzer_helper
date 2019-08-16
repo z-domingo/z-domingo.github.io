@@ -1,0 +1,59 @@
+/*
+    functions as storage of data
+ */
+public class DomingoAssignment2Helper {
+
+    private String date;
+    private double open;
+    private double close;
+
+    //adjusted prices that account for future splits
+    private double adjOpen;
+    private double adjClose;
+
+    //only default constructor needed
+    public DomingoAssignment2Helper() {
+    }
+
+    //getters and setters
+
+    protected double getAdjOpen() {
+        return adjOpen;
+    }
+
+    protected void setAdjOpen(double adjOpen) {
+        this.adjOpen = adjOpen;
+    }
+
+    protected double getAdjClose() {
+        return adjClose;
+    }
+
+    protected void setAdjClose(double adjClose) {
+        this.adjClose = adjClose;
+    }
+
+    protected String getDate() {
+        return date;
+    }
+
+    protected void setDate(String date) {
+        this.date = date;
+    }
+
+    protected double getOpen() {
+        return open;
+    }
+
+    protected void setOpen(double open) {
+        this.open = open;
+    }
+
+    protected double getClose() {
+        return close;
+    }
+
+    protected void setClose(double close) {
+        this.close = close;
+    }
+}
