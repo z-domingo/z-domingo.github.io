@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Scanner;
 
+/* Goal: Get user input for company, access remote database of historical stock prices, adjust all prices relative to current value,
+   display stock split ratio, execute investment strategy using 50 day moving average, return net cash value.
+ */
+
 public class DomingoAssignment2 {
 
     static Connection conn = null;
