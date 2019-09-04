@@ -9,7 +9,7 @@ Implemented a Gibbs sampling algorithm using Bayesian methods with given prior i
 1. [Modeling and Forecasting Crime Patterns in Bellingham, WA](https://cedar.wwu.edu/cgi/viewcontent.cgi?article=1447&context=scholwk):
 Using data from the local police department, we created and compared a model using Singular Spectrum Analysis and a model using ARIMA to forecast incidence of particular types of crimes. We then compared the effectiveness of each model.
 
-## Programming Projects
+## Programming Research & Projects
 
 1. [Protein Resiliencey to the Effects of Drugs](https://github.com/z-domingo/z-domingo.github.io/blob/master/protein_resiliency_project.pdf):
 Working with a large team in conjunction with graduate research software, our goal was to provide preliminary findings of an exhaustively mutated protein with ligand.
