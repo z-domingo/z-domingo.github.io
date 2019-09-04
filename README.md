@@ -3,7 +3,7 @@
 <br>
 ## Statistics Research<br>
 <br>
-1. [Estimating Parameters of a Mixture Model](https://github.com/z-domingo/z-domingo.github.io/blob/master/Est_Model_Params_Math457Midterm.pdf)
+1. Estimating Parameters of a Mixture Model: [Report](https://github.com/z-domingo/z-domingo.github.io/blob/master/Est_Model_Params_Math457Midterm.pdf), [Source Code](https://github.com/z-domingo/z-domingo.github.io/blob/master/est_model_params_src.R)
   - Description: Implemented a Gibbs sampling algorithm using Bayesian methods with given prior information on a given dataset. The goal was to detect the presence of two sub-populations and determine the parameters of the distributions of the sub-populations.<br>
 
 1. [Modeling and Forecasting Crime Patterns in Bellingham, WA](https://cedar.wwu.edu/cgi/viewcontent.cgi?article=1447&context=scholwk)
