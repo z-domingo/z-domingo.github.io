@@ -25,6 +25,3 @@
   - Description: A short argumentative paper, comparing two mathematical concepts: Cavalieri's Principle and Laplace/Fourier Transformations.<br>
 <br>
 <br>
-# Professional Experience<br>
-<br>
-<br>
