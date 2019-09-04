@@ -20,10 +20,11 @@
 <br>
 
 ## Essays<br>
-
+<br>
 1. [An Exploration and Comparison of Laplace/Fourier Transformations and Cavalieri's Principle](https://github.com/z-domingo/z-domingo.github.io/blob/master/Laplace_Fourier_Trans_and_Cavalieris_Principle.pdf)
   - Description: A short argumentative paper, comparing two mathematical concepts: Cavalieri's Principle and Laplace/Fourier Transformations.<br>
-
+<br>
+<br>
 # Professional Experience<br>
 <br>
 <br>
