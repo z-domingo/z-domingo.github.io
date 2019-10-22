@@ -28,7 +28,7 @@
 
 # Personal Projects<br>
 <br>
-1. [Pizza Delivery Data](https://batchgeo.com/map/075584284e2a836d5f5ad77d4dcebe11)(In Progress)
+1. [Pizza Delivery Data](https://batchgeo.com/map/075584284e2a836d5f5ad77d4dcebe11) (In Progress)
   - Description: Preliminary "heatmap" to see different data points from delivery orders.
   
 <p><iframe src="https://batchgeo.com/map/075584284e2a836d5f5ad77d4dcebe11" frameborder="0" width="100%" height="550" style="border:1px solid #aaa;"></iframe></p><p><small>View <a href="https://batchgeo.com/map/075584284e2a836d5f5ad77d4dcebe11">Pizza Delivery Data</a> in a full screen map</small></p>
